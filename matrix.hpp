@@ -55,6 +55,18 @@ public:
     return result;
   }
 
+  template <typename K>
+  auto operator * (const K& cte) const {
+    static_assert(std::is_arithmetic<K>::value, "to scale the value must be arithmetic");
+    auto result = matrix_factory<decltype(std::declval<T>() * cte), N, M>::zero();
+    for (size_t r = 0; r < N; r++) {
+      for (size_t c = 0; c < N; c++) {
+        result.at(r, c) = at(r, c) * cte;
+      }
+    }
+    return result;
+  }
+
 private:
 
   std::array<T, N * M> values_;
