@@ -89,9 +89,8 @@ public:
 
   ///~ operators
 
-  template <typename To, size_t No, size_t Mo>
-  auto operator + (const matrix<To, No, Mo>& rhs) {
-    static_assert(N == No && M == Mo, "dimensions must match to perform addition");
+  template <typename To>
+  auto operator + (const matrix<To, N, M>& rhs) {
     auto result = matrix_factory<decltype(std::declval<T>() + std::declval<To>()), N, M>::zero();
     for (size_t r = 0; r < N; r++) {
       for (size_t c = 0; c < M; c++) {
@@ -101,9 +100,8 @@ public:
     return result;
   }
 
-  template <typename To, size_t No, size_t Mo>
-  auto operator - (const matrix<To, No, Mo>& rhs) {
-    static_assert(N == No && M == Mo, "dimensions must match to perform addition");
+  template <typename To>
+  auto operator - (const matrix<To, N, M>& rhs) {
     auto result = matrix_factory<decltype(std::declval<T>() + std::declval<To>()), N, M>::zero();
     for (size_t r = 0; r < N; r++) {
       for (size_t c = 0; c < M; c++) {
@@ -125,9 +123,8 @@ public:
     return result;
   }
 
-  template <typename To, size_t No, size_t Mo>
-  auto operator * (const matrix<To, No, Mo>& rhs) const {
-    static_assert(M == No, "wrong dimensions to perform matrix multiplication");
+  template <typename To, size_t Mo>
+  auto operator * (const matrix<To, M, Mo>& rhs) const {
     auto result = matrix_factory<decltype(std::declval<T>() * std::declval<To>()), N, Mo>::zero();
     for (size_t r = 0; r < N; r++) {
       for (size_t c = 0; c < Mo; c++) {
