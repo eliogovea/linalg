@@ -63,5 +63,27 @@ int main() {
   std::cout << D << "\n\n";
 
   LA::matrix<double, 2, 2> E = A;
-  std::cout << E << "\n\n";
+  std::cout << "E = \n" << E << "\n\n";
+
+  try {
+    auto F = std::move(A);
+    std::cout << "F = \n" << F << "\n\n";
+    std::cout << "A = \n" << A << "\n\n";
+
+    A[0][0] = 15;
+    F[0][0] = -1;
+
+    std::cout << "F = \n" << F << "\n\n";
+    std::cout << "A = \n" << A << "\n\n";
+
+  } catch (std::exception& e) {
+    std::cout << e.what() << "\n";
+  }
+  
+  LA::matrix<int, 2, 2> G = {{9, 8, 7 ,6}};
+  std::cout << "G = \n" << G << "\n\n";
+
+  // std::cout << "H = \n" << H << "\n\n";
+
+  LA::matrix<int, 2, 2> I = {{1, 0}};
 }

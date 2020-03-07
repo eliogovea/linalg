@@ -19,20 +19,22 @@ public:
   /**
    * default constructor
    */
-  matrix() noexcept : values_{} {
+  explicit matrix() noexcept : values_{} {
     for (auto& x: values_) {
       x = T{0};
     }
   }
 
+  matrix(std::array<T, N * M> values) : values_{values} {}
+
   /**
-   * copy contructor
+   * copy constructor
    */
   template <typename T_>
-  matrix<T, N, M>(const matrix<T_, N, M>& other) {
-    for (int i = 0; i < N; i++) {
-      for (int j = 0; j < M; j++) {
-        at(i, j) = static_cast<T>(other.at(i, j));
+  matrix(const matrix<T_, N, M>& other) {
+    for (size_t r = 0; r < N; r++) {
+      for (size_t c = 0; c < M; c++) {
+        at(r, c) = static_cast<T>(other.at(r, c));
       }
     }
   }
@@ -42,17 +44,15 @@ public:
    * TODO
    */
   template <typename T_, typename = std::enable_if_t<std::is_same_v<T, T_>>>
-  matrix<T, N, M>(const matrix<T_, N, M>&& other);
+  matrix<T, N, M>(const matrix<T_, N, M>&& other) : values_{std::move(other.values_)} {}
 
   /**
    * copy assignment
    */
   template <typename T_>
   matrix<T, N, M>& operator = (const matrix<T_, N, M>& other) {
-    for (int i = 0; i < N; i++) {
-      for (int j = 0; j < M; j++) {
-        at(i, j) = static_cast<T>(other.at(i, j));
-      }
+    for (size_t i = 0; i < N * M; i++) {
+      values_[i] = static_cast<T>(other.values_[i]);
     }
   }
 
@@ -61,12 +61,17 @@ public:
    * TODO
    */
   template <typename T_, typename = std::enable_if_t<std::is_same_v<T, T_>>>
-  matrix<T, N, M>& operator = (const matrix<T_, N, M>&& other);
+  matrix<T, N, M>& operator = (const matrix<T_, N, M>&& other) {
+    if (&other == this) {
+      return *this;
+    }
+    values_ = std::move(other.values_);
+  }
 
   /**
    * destructor
    */
-  ~matrix() {} // 
+  ~matrix<T, N, M>() {} // 
 
   /**
    * friend class for creating special matrices
