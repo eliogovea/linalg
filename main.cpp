@@ -3,6 +3,7 @@
 #include <vector>
 
 #include "matrix.hpp"
+#include "vector.hpp"
 
 namespace LA = linear_algebra;
 
@@ -31,4 +32,8 @@ int main() {
   std::cout << A * 2.0 << "\n\n";
 
   std::cout << 2 * A << "\n\n";
+
+  auto E = LA::matrix_factory<int, 2, 1>::zero();
+
+  std::cout << E[0][0] << "\n\n";
 }
