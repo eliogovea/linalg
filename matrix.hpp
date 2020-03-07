@@ -4,41 +4,9 @@
 #include <cassert>
 
 #include "factory.hpp"
+#include "util.hpp"
 
 namespace linear_algebra {
-
-/**
- * lightweigth view of a row
- * (like std::span)
- */
-template <typename T, size_t M>
-class row_view {
-public:
-
-  row_view(T* values, size_t size) : values_{values}, size_{size} {}
-
-  T& operator [] (size_t idx) {
-    if (!(idx < size_)) {
-      throw std::out_of_range("out of range");
-    }
-    return values_[idx];
-  }
-
-  const T& operator [] (size_t idx) const {
-    if (!(idx < size_)) {
-      throw std::out_of_range("out of range");
-    }
-    return values_[idx];
-  }
-  
-  // TODO
-  // better way to iterate
-
-private:
-
-  T* values_;
-  size_t size_;
-};
 
 /**
  * generic matrix class
@@ -48,29 +16,82 @@ template <typename T, size_t N, size_t M>
 class matrix {
 public:
 
+  /**
+   * default constructor
+   */
   matrix() noexcept : values_{} {
     for (auto& x: values_) {
-      x = T(0);
+      x = T{0};
     }
   }
 
-  template<typename To, size_t No, size_t Mo>
+  /**
+   * copy contructor
+   */
+  template <typename T_>
+  matrix<T, N, M>(const matrix<T_, N, M>& other) {
+    for (int i = 0; i < N; i++) {
+      for (int j = 0; j < M; j++) {
+        at(i, j) = static_cast<T>(other.at(i, j));
+      }
+    }
+  }
+
+  /**
+   * move contructor
+   * TODO
+   */
+  template <typename T_, typename = std::enable_if_t<std::is_same_v<T, T_>>>
+  matrix<T, N, M>(const matrix<T_, N, M>&& other);
+
+  /**
+   * copy assignment
+   */
+  template <typename T_>
+  matrix<T, N, M>& operator = (const matrix<T_, N, M>& other) {
+    for (int i = 0; i < N; i++) {
+      for (int j = 0; j < M; j++) {
+        at(i, j) = static_cast<T>(other.at(i, j));
+      }
+    }
+  }
+
+  /**
+   * move assignment
+   * TODO
+   */
+  template <typename T_, typename = std::enable_if_t<std::is_same_v<T, T_>>>
+  matrix<T, N, M>& operator = (const matrix<T_, N, M>&& other);
+
+  /**
+   * destructor
+   */
+  ~matrix() {} // 
+
+  /**
+   * friend class for creating special matrices
+   */
+  template<typename T_, size_t N_, size_t M_>
   friend class matrix_factory;
 
   ///~ utilities
 
-  row_view<T, M> operator [] (size_t r) {
+  /**
+   * data access
+   */
+
+  util::row_view<T, M> operator [] (size_t r) {
     if (!(r < N)) {
       throw std::out_of_range("index out of range");
     }
-    return row_view<T, M>(values_.data() + r * N, M);
+    return util::row_view<T, M>(values_.data() + r * N, M);
   }
 
-  const row_view<T, M> operator [] (size_t r) const {
+  const util::row_view<T, M> operator [] (size_t r) const {
     if (!(r < N)) {
       throw std::out_of_range("index out of range");
     }
-    return row_view<T, M>(values_.data() + r * N, M);
+    return util::row_view<T, M>(values_.data() + r * N, M);
   }
   
   T& at(size_t r, size_t c) {
@@ -89,9 +110,9 @@ public:
 
   ///~ operators
 
-  template <typename To>
-  auto operator + (const matrix<To, N, M>& rhs) {
-    auto result = matrix_factory<decltype(std::declval<T>() + std::declval<To>()), N, M>::zero();
+  template <typename T_>
+  auto operator + (const matrix<T_, N, M>& rhs) {
+    auto result = matrix_factory<util::result_of_add_t<T, T_>, N, M>::zero();
     for (size_t r = 0; r < N; r++) {
       for (size_t c = 0; c < M; c++) {
         result.at(r, c) = at(r, c) + rhs.at(r, c);
@@ -100,9 +121,9 @@ public:
     return result;
   }
 
-  template <typename To>
-  auto operator - (const matrix<To, N, M>& rhs) {
-    auto result = matrix_factory<decltype(std::declval<T>() + std::declval<To>()), N, M>::zero();
+  template <typename T_>
+  auto operator - (const matrix<T_, N, M>& rhs) {
+    auto result = matrix_factory<util::result_of_add_t<T, T_>, N, M>::zero();
     for (size_t r = 0; r < N; r++) {
       for (size_t c = 0; c < M; c++) {
         result.at(r, c) = at(r, c) - rhs.at(r, c);
@@ -111,23 +132,25 @@ public:
     return result;
   }
 
-  template <typename K>
-  auto operator * (const K& rhs) const {
-    static_assert(std::is_arithmetic<K>::value, "to scale the value must be arithmetic");
-    auto result = matrix_factory<decltype(std::declval<T>() * rhs), N, M>::zero();
+  template <typename T_>
+  std::enable_if_t<
+    std::is_arithmetic_v<T_>, 
+    matrix<util::result_of_mul_t<T, T_>, N, M>
+  > operator * (const T_& rhs) const {
+    auto result = matrix_factory<util::result_of_mul_t<T, T_>, N, M>::zero();
     for (size_t r = 0; r < N; r++) {
-      for (size_t c = 0; c < N; c++) {
+      for (size_t c = 0; c < M; c++) {
         result.at(r, c) = at(r, c) * rhs;
       }
     }
     return result;
   }
 
-  template <typename To, size_t Mo>
-  auto operator * (const matrix<To, M, Mo>& rhs) const {
-    auto result = matrix_factory<decltype(std::declval<T>() * std::declval<To>()), N, Mo>::zero();
+  template <typename T_, size_t M_>
+  auto operator * (const matrix<T_, M, M_>& rhs) const {
+    auto result = matrix_factory<util::result_of_add_mul_t<T, T_>, N, M_>::zero();
     for (size_t r = 0; r < N; r++) {
-      for (size_t c = 0; c < Mo; c++) {
+      for (size_t c = 0; c < M_; c++) {
         for (size_t i = 0; i < M; i++) {
           result.at(r, c) = result.at(r, c) + at(r, i) * rhs.at(i, c);
         }
@@ -135,7 +158,6 @@ public:
     }
     return result;
   }
-
 
 private:
 
@@ -147,7 +169,7 @@ private:
 template <typename K, typename T, size_t N, size_t M>
 typename std::enable_if<
   std::is_arithmetic<K>::value,
-  matrix<decltype(std::declval<K>() * std::declval<T>()), N, M>
+  matrix<util::result_of_mul_t<K, T>, N, M>
 >::type operator * (const K& lhs, const matrix<T, N, M>& rhs) {
   return rhs * lhs;
 }

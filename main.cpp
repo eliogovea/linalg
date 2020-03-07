@@ -8,6 +8,9 @@
 namespace LA = linear_algebra;
 
 int main() {
+  std::cout.precision(4);
+  std::cout << std::fixed;
+
   auto A = LA::matrix_factory<int, 2, 2>::eye();
 
   std::cout << "ostream operator <<\n";
@@ -53,6 +56,12 @@ int main() {
   C[0][0] = 1; C[0][1] = 2; C[0][2] = 3;
   C[1][0] = 1; C[1][1] = 3; C[1][2] = 4;
 
-  std::cout << "A * C = \n" << A * C << "\n";
+  std::cout << "A * C = \n" << A * C << "\n\n";
   // std::cout << "C * A = \n" << C * A << "\n"; // complation error
+
+  auto D = A;
+  std::cout << D << "\n\n";
+
+  LA::matrix<double, 2, 2> E = A;
+  std::cout << E << "\n\n";
 }
