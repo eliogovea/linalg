@@ -3,8 +3,7 @@
 #include <array>
 #include <cassert>
 
-#include "factory.hpp"
-#include "util.hpp"
+#include <linalg/util.hpp>
 
 namespace linear_algebra {
 
@@ -122,9 +121,22 @@ class matrix {
 
   ///~ operators
 
+  /// cast
+
+  template <typename T_>
+  explicit operator matrix<T_, N, M>() const {
+    auto result = matrix<T_, N, M>{};
+    for (size_t r = 0; r < N; r++) {
+      for (size_t c = 0; c < M; c++) {
+        result.at(r, c) = static_cast<T_>(at(r, c));
+      }
+    }
+    return result;
+  }
+
   template <typename T_>
   auto operator+(const matrix<T_, N, M>& rhs) {
-    auto result = matrix_factory<util::result_of_add_t<T, T_>, N, M>::zero();
+    auto result = matrix<util::result_of_add_t<T, T_>, N, M>{};
     for (size_t r = 0; r < N; r++) {
       for (size_t c = 0; c < M; c++) {
         result.at(r, c) = at(r, c) + rhs.at(r, c);
@@ -135,7 +147,7 @@ class matrix {
 
   template <typename T_>
   auto operator-(const matrix<T_, N, M>& rhs) {
-    auto result = matrix_factory<util::result_of_add_t<T, T_>, N, M>::zero();
+    auto result = matrix<util::result_of_add_t<T, T_>, N, M>{};
     for (size_t r = 0; r < N; r++) {
       for (size_t c = 0; c < M; c++) {
         result.at(r, c) = at(r, c) - rhs.at(r, c);
@@ -148,7 +160,7 @@ class matrix {
   std::enable_if_t<std::is_arithmetic_v<T_>,
                    matrix<util::result_of_mul_t<T, T_>, N, M>>
   operator*(const T_& rhs) const {
-    auto result = matrix_factory<util::result_of_mul_t<T, T_>, N, M>::zero();
+    auto result = matrix<util::result_of_mul_t<T, T_>, N, M>{};
     for (size_t r = 0; r < N; r++) {
       for (size_t c = 0; c < M; c++) {
         result.at(r, c) = at(r, c) * rhs;
@@ -160,7 +172,7 @@ class matrix {
   template <typename T_, size_t M_>
   auto operator*(const matrix<T_, M, M_>& rhs) const {
     auto result =
-        matrix_factory<util::result_of_add_mul_t<T, T_>, N, M_>::zero();
+        matrix<util::result_of_add_mul_t<T, T_>, N, M_>{};
     for (size_t r = 0; r < N; r++) {
       for (size_t c = 0; c < M_; c++) {
         for (size_t i = 0; i < M; i++) {

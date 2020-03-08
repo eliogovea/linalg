@@ -1,6 +1,6 @@
 #pragma once
 
-#include "util.hpp"
+#include <linalg/util.hpp>
 
 namespace linear_algebra {
 
@@ -57,6 +57,15 @@ class vector {
   const T& operator[](size_t idx) const { return values_[idx]; }
 
   explicit operator matrix<T, N, 1>() const { return matrix<T, N, 1>(values_); }
+
+  template <typename T_>
+  explicit operator vector<T_, N>() const {
+    auto result = vector<T_, N>{};
+    for (size_t i = 0; i < N; i++) {
+      result[i] = static_cast<T_>(values_[i]);
+    }
+    return std::move(result);
+  }
 
  private:
   std::array<T, N> values_;
