@@ -17,12 +17,10 @@ class vector {
   }
 
   vector(std::array<T, N> values) {
-    std::cout << "ctor array\n";
     std::copy(values.begin(), values.end(), values_.begin());
   }
 
   vector(const matrix<T, N, 1>& A) {
-    std::cout << "ctor matrix\n";
     for (size_t i = 0; i < N; i++) {
       values_[i] = A.at(i, 0);
     }
@@ -30,7 +28,6 @@ class vector {
 
   template <typename T_>
   vector(const vector<T_, N>& other) {
-    std::cout << "ctor copy\n";
     for (size_t i = 0; i < N; i++) {
       values_[i] = other[i];
     }
@@ -38,13 +35,10 @@ class vector {
 
   template <typename T_, typename = std::enable_if_t<std::is_same_v<T, T_>>>
   vector<T, N>(const vector<T_, N>&& other)
-      : values_{std::move(other.values_)} {
-    std::cout << "ctor move\n";
-  }
+      : values_{std::move(other.values_)} {}
 
   template <typename T_>
   vector<T, N>& operator=(const vector<T_, N>& other) {
-    std::cout << "assign copy\n";
     for (size_t i = 0; i < N; i++) {
       values_[i] = static_cast<T>(other.values_[i]);
     }
@@ -52,7 +46,6 @@ class vector {
 
   template <typename T_, typename = std::enable_if_t<std::is_same_v<T, T_>>>
   vector<T, N>& operator=(const vector<T_, N>&& other) {
-    std::cout << "assign move\n";
     if (&other == this) {
       return *this;
     }
