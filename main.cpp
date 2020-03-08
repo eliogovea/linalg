@@ -1,5 +1,4 @@
 #include <iostream>
-
 #include <string>
 
 #include "matrix.hpp"
@@ -50,11 +49,15 @@ int main() {
   std::cout << "A * 2.5 = \n" << A * 2.5 << "\n\n";
 
   // std::string k = "2";
-  // std::cout << A * k << "\n"; // compilation error, k must be arithmetic 
+  // std::cout << A * k << "\n"; // compilation error, k must be arithmetic
 
   std::cout << "matrix multiplication:\n";
-  C[0][0] = 1; C[0][1] = 2; C[0][2] = 3;
-  C[1][0] = 1; C[1][1] = 3; C[1][2] = 4;
+  C[0][0] = 1;
+  C[0][1] = 2;
+  C[0][2] = 3;
+  C[1][0] = 1;
+  C[1][1] = 3;
+  C[1][2] = 4;
 
   std::cout << "A * C = \n" << A * C << "\n\n";
   // std::cout << "C * A = \n" << C * A << "\n"; // complation error
@@ -79,11 +82,8 @@ int main() {
   } catch (std::exception& e) {
     std::cout << e.what() << "\n";
   }
-  
-  LA::matrix<int, 2, 2> G = {
-    9, 8, 
-    7 ,6
-  };
+
+  LA::matrix<int, 2, 2> G = {9, 8, 7, 6};
 
   std::cout << "G = \n" << G << "\n\n";
 
