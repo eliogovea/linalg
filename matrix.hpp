@@ -15,7 +15,6 @@ namespace linear_algebra {
 template <typename T, size_t N, size_t M>
 class matrix {
 public:
-
   /**
    * default constructor
    */
@@ -23,6 +22,10 @@ public:
     for (auto& x: values_) {
       x = T{0};
     }
+  }
+
+  matrix(std::initializer_list<T> list) {
+    std::copy(list.begin(), list.end(), values_.begin());
   }
 
   matrix(std::array<T, N * M> values) : values_{values} {}
@@ -89,28 +92,28 @@ public:
     if (!(r < N)) {
       throw std::out_of_range("index out of range");
     }
-    return util::row_view<T, M>(values_.data() + r * N, M);
+    return util::row_view<T, M>(values_.data() + r * M);
   }
 
   const util::row_view<T, M> operator [] (size_t r) const {
     if (!(r < N)) {
       throw std::out_of_range("index out of range");
     }
-    return util::row_view<T, M>(values_.data() + r * N, M);
+    return util::row_view<T, M>(values_.data() + r * M);
   }
   
   T& at(size_t r, size_t c) {
     if (!(r < N) && !(c < M)) {
       throw std::out_of_range("index out of range");
     }
-    return values_[r * N + c];
+    return values_[r * M + c];
   }
 
   const T& at(size_t r, size_t c) const {
     if (!(r < N) && !(c < M)) {
       throw std::out_of_range("index out of range");
     }
-    return values_[r * N + c];
+    return values_[r * M + c];
   }
 
   ///~ operators

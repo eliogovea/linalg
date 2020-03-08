@@ -80,10 +80,25 @@ int main() {
     std::cout << e.what() << "\n";
   }
   
-  LA::matrix<int, 2, 2> G = {{9, 8, 7 ,6}};
+  LA::matrix<int, 2, 2> G = {
+    9, 8, 
+    7 ,6
+  };
+
   std::cout << "G = \n" << G << "\n\n";
 
   // std::cout << "H = \n" << H << "\n\n";
 
-  LA::matrix<int, 2, 2> I = {{1, 0}};
+  LA::matrix<int, 2, 2> I{1, 1, 1, 0};
+  std::cout << "I = \n" << I << "\n\n";
+
+  LA::vector<int, 2> v = {2, 3};
+  std::cout << "v = \n" << v << "\n\n";
+
+  int x = v[0];
+  std::cout << "x = " << x << "\n";
+
+  auto w = A * v;
+  std::cout << "A = \n" << A << "\n\n";
+  std::cout << "w = \n" << w << "\n\n";
 }
