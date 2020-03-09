@@ -9,32 +9,28 @@ namespace linear_algebra {
 
 /**
  * generic matrix class
- * supported operations: +, -, *
+ * supported operations: +, -, *, ...
  */
 template <typename T, size_t N, size_t M>
 class matrix {
  public:
-  /**
-   * default constructor
-   */
+  using _T = T;
+  static const size_t _N = N;
+  static const size_t _M = M;
+
   explicit matrix() noexcept : values_{} {
     for (auto& x : values_) {
       x = T{0};
     }
   }
 
-  /**
-   * uniform initialization
-   */
   matrix(std::initializer_list<T> list) {
+    // TODO check list.size() !!!
     std::copy(list.begin(), list.end(), values_.begin());
   }
 
   matrix(std::array<T, N * M> values) : values_{values} {}
 
-  /**
-   * copy constructor
-   */
   template <typename T_>
   matrix(const matrix<T_, N, M>& other) {
     for (size_t r = 0; r < N; r++) {
@@ -44,39 +40,25 @@ class matrix {
     }
   }
 
-  /**
-   * move contructor
-   * TODO
-   */
   template <typename T_, typename = std::enable_if_t<std::is_same_v<T, T_>>>
-  matrix<T, N, M>(const matrix<T_, N, M>&& other)
+  matrix(const matrix<T_, N, M>&& other)
       : values_{std::move(other.values_)} {}
 
-  /**
-   * copy assignment
-   */
   template <typename T_>
-  matrix<T, N, M>& operator=(const matrix<T_, N, M>& other) {
+  matrix& operator=(const matrix<T_, N, M>& other) {
     for (size_t i = 0; i < N * M; i++) {
       values_[i] = static_cast<T>(other.values_[i]);
     }
   }
 
-  /**
-   * move assignment
-   * TODO
-   */
   template <typename T_, typename = std::enable_if_t<std::is_same_v<T, T_>>>
-  matrix<T, N, M>& operator=(const matrix<T_, N, M>&& other) {
+  matrix& operator=(const matrix<T_, N, M>&& other) {
     if (&other == this) {
       return *this;
     }
     values_ = std::move(other.values_);
   }
 
-  /**
-   * destructor
-   */
   ~matrix<T, N, M>() {}  //
 
   /**
@@ -85,24 +67,30 @@ class matrix {
   template <typename T_, size_t N_, size_t M_>
   friend class matrix_factory;
 
-  ///~ utilities
-
   /**
-   * data access
+   * data access methods and operators
    */
 
-  util::row_view<T, M> operator[](size_t r) {
-    if (!(r < N)) {
+  util::row_view<T, M> row(size_t idx) {
+    if (!(idx < N)) {
       throw std::out_of_range("index out of range");
     }
-    return util::row_view<T, M>(values_.data() + r * M);
+    return util::row_view<T, M>(values_.data() + idx * M);
   }
 
-  const util::row_view<T, M> operator[](size_t r) const {
-    if (!(r < N)) {
+  util::matrix_view<T, N, M> column(size_t idx) {
+    if (!(idx < N)) {
       throw std::out_of_range("index out of range");
     }
-    return util::row_view<T, M>(values_.data() + r * M);
+    return util::matrix_view<T, N, M>(values_.data() + idx);
+  }
+
+  util::row_view<T, M> operator[](size_t r) {
+    return row(r);
+  }
+
+  util::row_view<T, M> operator[](size_t r) const {
+    return row(r);
   }
 
   T& at(size_t r, size_t c) {
@@ -119,9 +107,9 @@ class matrix {
     return values_[r * M + c];
   }
 
-  ///~ operators
-
-  /// cast
+  /**
+   * explicit matrix cast
+   */
 
   template <typename T_>
   explicit operator matrix<T_, N, M>() const {
@@ -133,6 +121,10 @@ class matrix {
     }
     return result;
   }
+
+  /**
+   * arithmetic operators
+   */
 
   template <typename T_>
   auto operator+(const matrix<T_, N, M>& rhs) {
@@ -187,7 +179,9 @@ class matrix {
   std::array<T, N * M> values_;
 };
 
-///~ cte * matrix
+/**
+ * cte * matrix
+ */
 
 template <typename K, typename T, size_t N, size_t M>
 typename std::enable_if<std::is_arithmetic<K>::value,
@@ -196,7 +190,9 @@ operator*(const K& lhs, const matrix<T, N, M>& rhs) {
   return rhs * lhs;
 }
 
-///~ output
+/**
+ * ouput operator
+ */
 
 template <typename T, size_t N, size_t M>
 std::ostream& operator<<(std::ostream& out, const matrix<T, N, M>& A) {

@@ -106,4 +106,8 @@ int main() {
 
   auto Ad = static_cast<LA::matrix<double, 2, 2>>(A);
   std::cout << "Ad = \n" << Ad << "\n\n"; 
+
+  LA::matrix<float, decltype(A)::_N, decltype(A)::_M> Z = A;
+
+  static_assert(std::is_same<decltype(Z)::_T, float>::value);
 }
