@@ -3,7 +3,7 @@
 namespace linear_algebra {
 
 // forward declaration
-template <typename T, size_t N, size_t M>
+template <typename T, std::size_t N, std::size_t M>
 class matrix;
 
 /**
@@ -11,7 +11,7 @@ class matrix;
  * it is declared as friend inside the matrix so
  * it have access to private members
  */
-template <typename T, size_t N, size_t M>
+template <typename T, std::size_t N, std::size_t M>
 struct matrix_factory {
   /**
    * create an all-zeroes matrix
@@ -33,7 +33,7 @@ struct matrix_factory {
                   "positive size for every dimension is required");
     static_assert(N == M, "dimensions must match to create an identity matrix");
     auto result = zero();
-    for (size_t r = 0; r < N; r++) {
+    for (std::size_t r = 0; r < N; r++) {
       result.at(r, r) = T{1};
     }
     return result;  // move ???

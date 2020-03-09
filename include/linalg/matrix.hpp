@@ -2,7 +2,6 @@
 
 #include <array>
 #include <cassert>
-
 #include <linalg/util.hpp>
 
 namespace linear_algebra {
@@ -11,12 +10,12 @@ namespace linear_algebra {
  * generic matrix class
  * supported operations: +, -, *, ...
  */
-template <typename T, size_t N, size_t M>
+template <typename T, std::size_t N, std::size_t M>
 class matrix {
  public:
   using _T = T;
-  static const size_t _N = N;
-  static const size_t _M = M;
+  static const std::size_t _N = N;
+  static const std::size_t _M = M;
 
   explicit matrix() noexcept : values_{} {
     for (auto& x : values_) {
@@ -29,78 +28,72 @@ class matrix {
     std::copy(list.begin(), list.end(), values_.begin());
   }
 
-  matrix(std::array<T, N * M> values) : values_{values} {}
+  explicit matrix(std::array<T, N * M> values) : values_{values} {}
 
-  template <typename T_>
-  matrix(const matrix<T_, N, M>& other) {
-    for (size_t r = 0; r < N; r++) {
-      for (size_t c = 0; c < M; c++) {
+  matrix(const matrix& other) {
+    for (std::size_t r = 0; r < N; r++) {
+      for (std::size_t c = 0; c < M; c++) {
         at(r, c) = static_cast<T>(other.at(r, c));
       }
     }
   }
 
-  template <typename T_, typename = std::enable_if_t<std::is_same_v<T, T_>>>
-  matrix(const matrix<T_, N, M>&& other)
-      : values_{std::move(other.values_)} {}
+  matrix(const matrix&& other) noexcept : values_{std::move(other.values_)} {}
 
-  template <typename T_>
-  matrix& operator=(const matrix<T_, N, M>& other) {
-    for (size_t i = 0; i < N * M; i++) {
+  matrix& operator=(const matrix& other) {
+    if (&other == this) {
+      return *this;
+    }
+    for (std::size_t i = 0; i < N * M; i++) {
       values_[i] = static_cast<T>(other.values_[i]);
     }
   }
 
-  template <typename T_, typename = std::enable_if_t<std::is_same_v<T, T_>>>
-  matrix& operator=(const matrix<T_, N, M>&& other) {
+  matrix& operator=(matrix&& other) noexcept {
     if (&other == this) {
       return *this;
     }
     values_ = std::move(other.values_);
   }
 
-  ~matrix<T, N, M>() {}  //
+  ~matrix<T, N, M>() = default;
 
   /**
    * friend class for creating special matrices
    */
-  template <typename T_, size_t N_, size_t M_>
+  template <typename T_, std::size_t N_, std::size_t M_>
   friend class matrix_factory;
 
   /**
    * data access methods and operators
    */
 
-  util::row_view<T, M> row(size_t idx) {
+  util::row_view<T, M> row(std::size_t idx) {
     if (!(idx < N)) {
       throw std::out_of_range("index out of range");
     }
     return util::row_view<T, M>(values_.data() + idx * M);
   }
 
-  util::matrix_view<T, N, M> column(size_t idx) {
+  util::matrix_view<T, N, M> column(std::size_t idx) {
     if (!(idx < N)) {
       throw std::out_of_range("index out of range");
     }
     return util::matrix_view<T, N, M>(values_.data() + idx);
   }
 
-  util::row_view<T, M> operator[](size_t r) {
-    return row(r);
-  }
+  util::row_view<T, M> operator[](std::size_t r) { return row(r); }
 
-  util::row_view<T, M> operator[](size_t r) const {
-    return row(r);
-  }
+  util::row_view<T, M> operator[](std::size_t r) const { return row(r); }
 
-  T& at(size_t r, size_t c) {
+  T& at(std::size_t r, std::size_t c) {
     if (!(r < N) && !(c < M)) {
       throw std::out_of_range("index out of range");
     }
     return values_[r * M + c];
   }
 
-  const T& at(size_t r, size_t c) const {
+  const T& at(std::size_t r, std::size_t c) const {
     if (!(r < N) && !(c < M)) {
       throw std::out_of_range("index out of range");
     }
@@ -108,14 +101,14 @@ class matrix {
   }
 
   /**
-   * explicit matrix cast
+   * matrix cast
    */
 
   template <typename T_>
-  explicit operator matrix<T_, N, M>() const {
+  operator matrix<T_, N, M>() const {
     auto result = matrix<T_, N, M>{};
-    for (size_t r = 0; r < N; r++) {
-      for (size_t c = 0; c < M; c++) {
+    for (std::size_t r = 0; r < N; r++) {
+      for (std::size_t c = 0; c < M; c++) {
         result.at(r, c) = static_cast<T_>(at(r, c));
       }
     }
@@ -129,8 +122,8 @@ class matrix {
   template <typename T_>
   auto operator+(const matrix<T_, N, M>& rhs) {
     auto result = matrix<util::result_of_add_t<T, T_>, N, M>{};
-    for (size_t r = 0; r < N; r++) {
-      for (size_t c = 0; c < M; c++) {
+    for (std::size_t r = 0; r < N; r++) {
+      for (std::size_t c = 0; c < M; c++) {
         result.at(r, c) = at(r, c) + rhs.at(r, c);
       }
     }
@@ -140,8 +133,8 @@ class matrix {
   template <typename T_>
   auto operator-(const matrix<T_, N, M>& rhs) {
     auto result = matrix<util::result_of_add_t<T, T_>, N, M>{};
-    for (size_t r = 0; r < N; r++) {
-      for (size_t c = 0; c < M; c++) {
+    for (std::size_t r = 0; r < N; r++) {
+      for (std::size_t c = 0; c < M; c++) {
         result.at(r, c) = at(r, c) - rhs.at(r, c);
       }
     }
@@ -153,21 +146,20 @@ class matrix {
                    matrix<util::result_of_mul_t<T, T_>, N, M>>
   operator*(const T_& rhs) const {
     auto result = matrix<util::result_of_mul_t<T, T_>, N, M>{};
-    for (size_t r = 0; r < N; r++) {
-      for (size_t c = 0; c < M; c++) {
+    for (std::size_t r = 0; r < N; r++) {
+      for (std::size_t c = 0; c < M; c++) {
         result.at(r, c) = at(r, c) * rhs;
       }
     }
     return result;
   }
 
-  template <typename T_, size_t M_>
+  template <typename T_, std::size_t M_>
   auto operator*(const matrix<T_, M, M_>& rhs) const {
-    auto result =
-        matrix<util::result_of_add_mul_t<T, T_>, N, M_>{};
-    for (size_t r = 0; r < N; r++) {
-      for (size_t c = 0; c < M_; c++) {
-        for (size_t i = 0; i < M; i++) {
+    auto result = matrix<util::result_of_add_mul_t<T, T_>, N, M_>{};
+    for (std::size_t r = 0; r < N; r++) {
+      for (std::size_t c = 0; c < M_; c++) {
+        for (std::size_t i = 0; i < M; i++) {
           result.at(r, c) = result.at(r, c) + at(r, i) * rhs.at(i, c);
         }
       }
@@ -183,7 +175,7 @@ class matrix {
  * cte * matrix
  */
 
-template <typename K, typename T, size_t N, size_t M>
+template <typename K, typename T, std::size_t N, std::size_t M>
 typename std::enable_if<std::is_arithmetic<K>::value,
                         matrix<util::result_of_mul_t<K, T>, N, M>>::type
 operator*(const K& lhs, const matrix<T, N, M>& rhs) {
@@ -194,10 +186,10 @@ operator*(const K& lhs, const matrix<T, N, M>& rhs) {
  * ouput operator
  */
 
-template <typename T, size_t N, size_t M>
+template <typename T, std::size_t N, std::size_t M>
 std::ostream& operator<<(std::ostream& out, const matrix<T, N, M>& A) {
-  for (size_t r = 0; r < N; r++) {
-    for (size_t c = 0; c < M; c++) {
+  for (std::size_t r = 0; r < N; r++) {
+    for (std::size_t c = 0; c < M; c++) {
       out << A.at(r, c);
       if (c + 1 < M) {
         out << " ";

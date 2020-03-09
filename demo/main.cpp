@@ -1,10 +1,8 @@
 #include <iostream>
-#include <string>
-
+#include <linalg/factory.hpp>
 #include <linalg/matrix.hpp>
 #include <linalg/vector.hpp>
-
-#include <linalg/factory.hpp>
+#include <string>
 
 namespace LA = linear_algebra;
 
@@ -100,12 +98,14 @@ int main() {
   int x = v[0];
   std::cout << "x = " << x << "\n";
 
+  v[1] = -1;
+
   auto w = A * v;
   std::cout << "A = \n" << A << "\n\n";
   std::cout << "w = \n" << w << "\n\n";
 
   auto Ad = static_cast<LA::matrix<double, 2, 2>>(A);
-  std::cout << "Ad = \n" << Ad << "\n\n"; 
+  std::cout << "Ad = \n" << Ad << "\n\n";
 
   LA::matrix<float, decltype(A)::_N, decltype(A)::_M> Z = A;
 
