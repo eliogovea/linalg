@@ -18,9 +18,9 @@ class matrix_view {
 
   template <typename T_, std::size_t S_ = S,
             typename = std::enable_if_t<S_ == 1>>
-  matrix_view(T_ value) {
-    values_ = new T[1];
+  matrix_view& operator=(T_ value) {
     values_[0] = static_cast<T>(value);
+    return *this;
   }
 
   T& operator[](std::size_t idx) {

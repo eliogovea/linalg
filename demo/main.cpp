@@ -96,9 +96,11 @@ int main() {
   std::cout << "v = \n" << v << "\n\n";
 
   int x = v[0];
-  std::cout << "x = " << x << "\n";
+  std::cout << "x = " << x << "\n\n";
 
   v[1] = -1;
+
+  std::cout << "v = \n" << v << "\n\n";
 
   auto w = A * v;
   std::cout << "A = \n" << A << "\n\n";
